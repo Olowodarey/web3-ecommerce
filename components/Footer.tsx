@@ -62,7 +62,7 @@ const Footer = () => {
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center">
             <p className="text-gray-400">
-              &copy; 2024 Web3 Store. Built with ❤️ on Starknet.
+              &copy; 2025 Web3 Store. Built with ❤️ on Starknet.
               <span className="text-blue-400 ml-2">Powered by the future of commerce.</span>
             </p>
           </div>
