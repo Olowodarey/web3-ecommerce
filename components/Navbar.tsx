@@ -1,59 +1,79 @@
-"use client"
-import React from 'react'
-import { Button } from '@/components/ui/button'
-import { ShoppingCart, Wallet, Plus, Minus, Sparkles } from "lucide-react"
-import Link from "next/link"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { toast } from "@/hooks/use-toast"
-import { useState } from 'react'
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+"use client";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, Wallet, Plus, Minus, Sparkles } from "lucide-react";
+import Link from "next/link";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useAccount } from "@starknet-react/core";
+import WalletConnectDialog from "./connectwallet/WalletConnectDialog";
+import Account from "./connectwallet/Accoiunt";
 
 interface Product {
-  id: number
-  name: string
-  price: number
-  image: string
-  description: string
-  stock: number
-  featured?: boolean
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  stock: number;
+  featured?: boolean;
 }
 
 interface CartItem extends Product {
-  quantity: number
+  quantity: number;
 }
 
 const Navbar = () => {
-  const [cart, setCart] = useState<CartItem[]>([])
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState("")
-  const [tokenBalance, setTokenBalance] = useState(1.5)
-  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [tokenBalance, setTokenBalance] = useState(1.5);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { account, isConnected } = useAccount();
 
   const connectWallet = async () => {
-    setIsWalletConnected(true)
-    setWalletAddress("0x1234...5678")
+    setIsWalletConnected(true);
+    setWalletAddress("0x1234...5678");
     toast({
       title: "🎉 Wallet Connected",
       description: "Successfully connected to Starknet on Sepolia testnet",
-    })
-  }
+    });
+  };
 
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity === 0) {
-      setCart((prevCart) => prevCart.filter((item) => item.id !== id))
+      setCart((prevCart) => prevCart.filter((item) => item.id !== id));
     } else {
-      setCart((prevCart) => prevCart.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item)))
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.id === id ? { ...item, quantity: newQuantity } : item
+        )
+      );
     }
-  }
+  };
 
   const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0)
-  }
+    return cart.reduce((total, item) => total + item.quantity, 0);
+  };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0)
-  }
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
 
   const buyNow = (product: Product) => {
     if (!isWalletConnected) {
@@ -61,8 +81,8 @@ const Navbar = () => {
         title: "🔐 Wallet Required",
         description: "Please connect your wallet to make a purchase",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (tokenBalance < product.price) {
@@ -70,16 +90,16 @@ const Navbar = () => {
         title: "💰 Insufficient Balance",
         description: "You don't have enough tokens for this purchase",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setTokenBalance((prev) => prev - product.price)
+    setTokenBalance((prev) => prev - product.price);
     toast({
       title: "🚀 Purchase Successful",
       description: `Successfully purchased ${product.name}`,
-    })
-  }
+    });
+  };
 
   const checkout = () => {
     if (!isWalletConnected) {
@@ -87,28 +107,28 @@ const Navbar = () => {
         title: "🔐 Wallet Required",
         description: "Please connect your wallet to checkout",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    const total = getTotalPrice()
+    const total = getTotalPrice();
     if (tokenBalance < total) {
       toast({
         title: "💰 Insufficient Balance",
         description: "You don't have enough tokens for this purchase",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setTokenBalance((prev) => prev - total)
-    setCart([])
-    setIsCartOpen(false)
+    setTokenBalance((prev) => prev - total);
+    setCart([]);
+    setIsCartOpen(false);
     toast({
       title: "🎉 Order Successful",
       description: "Your order has been processed successfully",
-    })
-  }
+    });
+  };
 
   return (
     <header className="relative z-40 border-b border-gray-800 bg-gray-900/80 backdrop-blur-xl w-full">
@@ -127,48 +147,46 @@ const Navbar = () => {
           </div>
 
           <nav className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 items-center space-x-8">
-              <Link
-                href="#"
-                className="text-white hover:text-blue-400 transition-all duration-300 font-medium relative group py-2"
-              >
-                Products
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
-              </Link>
-              <Link
-                href="#"
-                className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
-              >
-                About
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
-              </Link>
-              <Link
-                href="/admin/login"
-                className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
-              >
-                Admin
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
-              </Link>
+            <Link
+              href="#"
+              className="text-white hover:text-blue-400 transition-all duration-300 font-medium relative group py-2"
+            >
+              Products
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
+              href="#"
+              className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
+            >
+              About
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
+              href="/admin/login"
+              className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
+            >
+              Admin
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
             {isWalletConnected && (
               <div className="text-sm text-right bg-gray-900/50 rounded-lg p-3 border border-gray-800">
                 <div className="font-medium text-white">{walletAddress}</div>
-                <div className="text-blue-400 font-mono">{tokenBalance.toFixed(3)} ETH</div>
+                <div className="text-blue-400 font-mono">
+                  {tokenBalance.toFixed(3)} ETH
+                </div>
               </div>
             )}
 
-            <Button
-              onClick={connectWallet}
-              className={`${
-                isWalletConnected
-                  ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-green-500/25"
-                  : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-orange-500/25"
-              } text-white transition-all duration-300 transform hover:scale-105`}
-            >
-              <Wallet className="h-4 w-4 mr-2" />
-              {isWalletConnected ? "Connected" : "Connect Starknet"}
-            </Button>
+            <div>
+              {isConnected && account ? (
+                <Account />
+              ) : (
+                <Button onClick={() => setIsOpen(true)}>connect wallet</Button>
+              )}
+            </div>
 
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
@@ -187,14 +205,20 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent className="bg-gray-900/95 border-gray-800 backdrop-blur-xl">
                 <SheetHeader>
-                  <SheetTitle className="text-white text-xl">🛒 Shopping Cart</SheetTitle>
+                  <SheetTitle className="text-white text-xl">
+                    🛒 Shopping Cart
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
                   {cart.length === 0 ? (
                     <div className="text-center py-12">
                       <ShoppingCart className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                      <p className="text-gray-400 text-lg">Your cart is empty</p>
-                      <p className="text-gray-500 text-sm">Add some amazing products!</p>
+                      <p className="text-gray-400 text-lg">
+                        Your cart is empty
+                      </p>
+                      <p className="text-gray-500 text-sm">
+                        Add some amazing products!
+                      </p>
                     </div>
                   ) : (
                     <>
@@ -209,24 +233,34 @@ const Navbar = () => {
                             className="w-16 h-16 object-cover rounded-lg shadow-lg"
                           />
                           <div className="flex-1">
-                            <h3 className="font-medium text-white">{item.name}</h3>
-                            <p className="text-sm text-blue-400 font-mono">{item.price} ETH</p>
+                            <h3 className="font-medium text-white">
+                              {item.name}
+                            </h3>
+                            <p className="text-sm text-blue-400 font-mono">
+                              {item.price} ETH
+                            </p>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Button
                               size="icon"
                               variant="outline"
                               className="border-gray-700 bg-gray-800/50 hover:bg-gray-700 w-8 h-8 transition-all duration-300"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity - 1)
+                              }
                             >
                               <Minus className="h-3 w-3 text-white" />
                             </Button>
-                            <span className="w-8 text-center text-white font-medium">{item.quantity}</span>
+                            <span className="w-8 text-center text-white font-medium">
+                              {item.quantity}
+                            </span>
                             <Button
                               size="icon"
                               variant="outline"
                               className="border-gray-700 bg-gray-800/50 hover:bg-gray-700 w-8 h-8 transition-all duration-300"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity + 1)
+                              }
                             >
                               <Plus className="h-3 w-3 text-white" />
                             </Button>
@@ -252,11 +286,12 @@ const Navbar = () => {
                 </div>
               </SheetContent>
             </Sheet>
+            <WalletConnectDialog isOpen={isOpen} setIsOpen={setIsOpen} />
           </div>
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
