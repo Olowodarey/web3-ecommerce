@@ -1,151 +1,195 @@
-"use client"
-import React, { useEffect, useState } from 'react'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ShoppingCart, Zap } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
-import { Contract, Provider, constants } from 'starknet'
-import { StoreAbi } from '@/constants/abi'
-import { STORE_CONTRACT_ADDRESS } from '@/constants'
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, Zap } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { Contract, Provider, constants } from "starknet";
+import { StoreAbi } from "@/constants/abi";
+import { STORE_CONTRACT_ADDRESS } from "@/constants";
 
 interface Product {
-  id: number
-  name: string
-  price: number
-  image: string
-  description: string
-  stock: number
-  featured?: boolean
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  stock: number;
+  featured?: boolean;
 }
 
 interface CartItem extends Product {
-  quantity: number
+  quantity: number;
 }
 
 interface ContractProduct {
-  id: number
-  productname: string
-  price: number
-  quantity: number
-  Img: string
+  id: number;
+  productname: string;
+  price: number;
+  quantity: number;
+  Img: string;
 }
 
 const Product = () => {
-  const [products, setProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [cart, setCart] = useState<CartItem[]>([])
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState("")
-  const [strkPrice, setStrkPrice] = useState<number | null>(null)
-  const [isCartOpen, setIsCartOpen] = useState(false)
-  const [isPurchasing, setIsPurchasing] = useState(false)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [strkPrice, setStrkPrice] = useState<number | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   // Check wallet connection on component mount
   useEffect(() => {
-    checkWalletConnection()
-  }, [])
+    checkWalletConnection();
+  }, []);
 
   // Check if wallet is connected
   const checkWalletConnection = async () => {
     try {
-      const starknet = (window as any).starknet
+      const starknet = (window as any).starknet;
       if (starknet?.isConnected) {
-        setIsWalletConnected(true)
-        const accounts = await starknet.account.address
-        setWalletAddress(accounts)
+        setIsWalletConnected(true);
+        const accounts = await starknet.account.address;
+        setWalletAddress(accounts);
       }
     } catch (error) {
-      console.error('Error checking wallet connection:', error)
+      console.error("Error checking wallet connection:", error);
     }
-  }
+  };
 
   // Connect wallet function
   const connectWallet = async () => {
     try {
-      const starknet = (window as any).starknet
+      const starknet = (window as any).starknet;
       if (!starknet) {
         toast({
           title: "Wallet Not Found",
           description: "Please install ArgentX or Braavos wallet",
-          variant: "destructive"
-        })
-        return
+          variant: "destructive",
+        });
+        return;
       }
 
-      await starknet.enable()
-      setIsWalletConnected(true)
-      const accounts = await starknet.account.address
-      setWalletAddress(accounts)
-      
+      await starknet.enable();
+      setIsWalletConnected(true);
+      const accounts = await starknet.account.address;
+      setWalletAddress(accounts);
+
       toast({
         title: "🎉 Wallet Connected!",
-        description: "You can now make purchases with STRK tokens"
-      })
+        description: "You can now make purchases with STRK tokens",
+      });
     } catch (error) {
-      console.error('Error connecting wallet:', error)
+      console.error("Error connecting wallet:", error);
       toast({
         title: "Connection Failed",
         description: "Failed to connect wallet",
-        variant: "destructive"
-      })
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   // Function to calculate STRK amount needed for USD price
   const calculateStrkAmount = (usdPrice: number): string => {
-    if (!strkPrice) return "Loading..."
-    const strkAmount = usdPrice / strkPrice
-    return strkAmount.toFixed(4)
-  }
+    if (!strkPrice) return "Loading...";
+    const strkAmount = usdPrice / strkPrice;
+    return strkAmount.toFixed(4);
+  };
 
-  // Fetch live STRK price
+  // Fetch live STRK price from CoinGecko API
   const fetchStrkPrice = async () => {
     try {
-      // Using mock price for demo - replace with real API
-      const mockPrice = 1.50 // $1.50 per STRK
-      setStrkPrice(mockPrice)
-      
-      // Real API integration example:
-      // const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=starknet&vs_currencies=usd')
-      // const data = await response.json()
-      // setStrkPrice(data.starknet.usd)
-      
+      console.log("Fetching live STRK price from CoinGecko...");
+
+      // Fetch real live STRK price from CoinGecko API
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=starknet&vs_currencies=usd"
+      );
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("CoinGecko API response:", data);
+
+      if (data.starknet && data.starknet.usd) {
+        const livePrice = data.starknet.usd;
+        setStrkPrice(livePrice);
+        console.log("✅ Live STRK price updated:", `$${livePrice}`);
+
+        toast({
+          title: "📈 Live Price Updated",
+          description: `STRK price: $${livePrice.toFixed(4)}`,
+        });
+      } else {
+        throw new Error("Invalid API response structure");
+      }
     } catch (error) {
-      console.error('Error fetching STRK price:', error)
-      setStrkPrice(1.50) // Fallback price
+      console.error("❌ Error fetching live STRK price:", error);
+
+      // Fallback to realistic market price if API fails
+      const fallbackPrice = 0.125;
+      setStrkPrice(fallbackPrice);
+
+      toast({
+        title: "⚠️ Using Fallback Price",
+        description: `API unavailable. Using fallback: $${fallbackPrice}`,
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    fetchStrkPrice()
-  }, [])
+    // Fetch initial price
+    fetchStrkPrice();
+
+    // Set up periodic price updates every 30 seconds for live pricing
+    const priceUpdateInterval = setInterval(() => {
+      fetchStrkPrice();
+    }, 30000); // Update every 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(priceUpdateInterval);
+      console.log("🔄 Live price updates stopped");
+    };
+  }, []);
 
   // Fetch products from contract
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setIsLoading(true)
-        
+        setIsLoading(true);
+
         // Initialize Starknet provider
         const provider = new Provider({
-          nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`
-        })
+          nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`,
+        });
 
         // Initialize contract
         const contract = new Contract(
           StoreAbi[0],
           STORE_CONTRACT_ADDRESS,
           provider
-        )
+        );
 
-        console.log('Fetching products from contract...')
-        
+        console.log("Fetching products from contract...");
+
         // Call the get_all_items function
-        const response = await contract.get_all_items()
-        console.log('Contract response:', response)
-        
+        const response = await contract.get_all_items();
+        console.log("Contract response:", response);
+
         // Transform the contract response to match our Product interface
         const formattedProducts: Product[] = response.map((item: any) => ({
           id: Number(item.id.toString()),
@@ -154,50 +198,49 @@ const Product = () => {
           image: item.Img.toString(),
           description: `High-quality product with ID ${item.id}`,
           stock: Number(item.quantity.toString()),
-          featured: Number(item.id.toString()) <= 2 // Mark first 2 as featured
-        }))
+          featured: Number(item.id.toString()) <= 2, // Mark first 2 as featured
+        }));
 
-        setProducts(formattedProducts)
-        
+        setProducts(formattedProducts);
+
         toast({
           title: "✅ Products Loaded",
-          description: `Successfully loaded ${formattedProducts.length} products from blockchain`
-        })
-        
+          description: `Successfully loaded ${formattedProducts.length} products from blockchain`,
+        });
       } catch (error) {
-        console.error('Error fetching products:', error)
+        console.error("Error fetching products:", error);
         toast({
           title: "❌ Error",
           description: "Failed to fetch products from the contract",
-          variant: "destructive"
-        })
+          variant: "destructive",
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchProducts()
-  }, [])
+    fetchProducts();
+  }, []);
 
   // Add to cart function
   const addToCart = (product: Product) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id)
+      const existingItem = prevCart.find((item) => item.id === product.id);
       if (existingItem) {
-        return prevCart.map((item) => 
-          item.id === product.id 
-            ? { ...item, quantity: item.quantity + 1 } 
+        return prevCart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
             : item
-        )
+        );
       }
-      return [...prevCart, { ...product, quantity: 1 }]
-    })
-    
+      return [...prevCart, { ...product, quantity: 1 }];
+    });
+
     toast({
       title: "✨ Added to Cart",
       description: `${product.name} has been added to your cart`,
-    })
-  }
+    });
+  };
 
   // Real Web3 purchase function using deployed contract
   const buyNow = async (product: Product) => {
@@ -206,8 +249,8 @@ const Product = () => {
         title: "🔐 Wallet Required",
         description: "Please connect your wallet to make a purchase",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (product.stock <= 0) {
@@ -215,48 +258,48 @@ const Product = () => {
         title: "❌ Out of Stock",
         description: "This product is currently out of stock",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     try {
-      setIsPurchasing(true)
-      
+      setIsPurchasing(true);
+
       // Get connected wallet
-      const starknet = (window as any).starknet
+      const starknet = (window as any).starknet;
       if (!starknet?.isConnected) {
         toast({
           title: "❌ Wallet Not Connected",
           description: "Please connect your wallet first",
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
 
       // Initialize provider and contract with wallet
       const provider = new Provider({
-        nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`
-      })
-      
+        nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`,
+      });
+
       const contract = new Contract(
         StoreAbi[0],
         STORE_CONTRACT_ADDRESS,
         starknet.account // Use connected wallet account
-      )
+      );
 
       // Convert USD price back to cents for contract call
-      const priceInCents = Math.round(product.price * 100)
-      
+      const priceInCents = Math.round(product.price * 100);
+
       toast({
         title: "🔄 Processing Purchase...",
         description: "Calculating STRK amount using live oracle pricing...",
-      })
+      });
 
-      console.log('Calling buy_product with:', {
+      console.log("Calling buy_product with:", {
         productId: product.id,
         quantity: 1,
-        expectedPrice: priceInCents
-      })
+        expectedPrice: priceInCents,
+      });
 
       // Call buy_product function with live oracle pricing
       // The contract will automatically convert USD to STRK using Pragma Oracle
@@ -264,60 +307,48 @@ const Product = () => {
         product.id,
         1, // quantity
         priceInCents // expected_price in cents
-      )
+      );
 
-      console.log('Transaction result:', result)
+      console.log("Transaction result:", result);
 
       // Wait for transaction confirmation
-      await provider.waitForTransaction(result.transaction_hash)
+      await provider.waitForTransaction(result.transaction_hash);
 
       // Update local state to reflect purchase
-      setProducts(prevProducts => 
-        prevProducts.map(p => 
-          p.id === product.id 
-            ? { ...p, stock: p.stock - 1 }
-            : p
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p.id === product.id ? { ...p, stock: p.stock - 1 } : p
         )
-      )
+      );
 
       toast({
         title: "🎉 Purchase Successful!",
         description: `Successfully purchased ${product.name} with STRK tokens at live market rate!`,
-      })
-
+      });
     } catch (error: any) {
-      console.error('Purchase error:', error)
-      
-      let errorMessage = "Transaction failed. Please try again."
-      
+      console.error("Purchase error:", error);
+
+      let errorMessage = "Transaction failed. Please try again.";
+
       if (error.message?.includes("insufficient")) {
-        errorMessage = "Insufficient STRK balance for this purchase"
+        errorMessage = "Insufficient STRK balance for this purchase";
       } else if (error.message?.includes("allowance")) {
-        errorMessage = "Please approve STRK token spending first"
+        errorMessage = "Please approve STRK token spending first";
       } else if (error.message?.includes("quantity")) {
-        errorMessage = "Insufficient product stock"
+        errorMessage = "Insufficient product stock";
       } else if (error.message?.includes("rejected")) {
-        errorMessage = "Transaction was rejected by user"
+        errorMessage = "Transaction was rejected by user";
       }
 
       toast({
         title: "❌ Purchase Failed",
         description: errorMessage,
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsPurchasing(false)
+      setIsPurchasing(false);
     }
-  }
-    
-   
-    
-     
-    
-    
-    
-    
-
+  };
 
   return (
     <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -325,7 +356,9 @@ const Product = () => {
         <h2 className="text-5xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
           ✨ Featured Products
         </h2>
-        <p className="text-gray-400 text-xl">Discover unique digital assets and Web3 products</p>
+        <p className="text-gray-400 text-xl">
+          Discover unique digital assets and Web3 products
+        </p>
       </div>
 
       {isLoading ? (
@@ -364,7 +397,9 @@ const Product = () => {
                   <CardTitle className="text-xl mb-3 text-white group-hover:text-blue-300 transition-colors duration-300">
                     {product.name}
                   </CardTitle>
-                  <p className="text-gray-400 text-sm mb-6 leading-relaxed">{product.description}</p>
+                  <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                    {product.description}
+                  </p>
                   <div className="flex justify-between items-center mb-6">
                     <div className="text-left">
                       <span className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -382,7 +417,9 @@ const Product = () => {
                           : ""
                       } transition-all duration-300`}
                     >
-                      {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                      {product.stock > 0
+                        ? `${product.stock} in stock`
+                        : "Out of stock"}
                     </Badge>
                   </div>
                 </CardContent>
@@ -411,7 +448,7 @@ const Product = () => {
         </div>
       )}
     </main>
-  )
-}
+  );
+};
 
-export default Product
+export default Product;
