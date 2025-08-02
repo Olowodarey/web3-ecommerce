@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { Contract, Provider, constants } from "starknet";
 import { StoreAbi } from "@/constants/abi";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
+import BuyNowButton from "@/components/BuyNowButton";
 
 interface Product {
   id: number;
@@ -242,113 +243,7 @@ const Product = () => {
     });
   };
 
-  // Real Web3 purchase function using deployed contract
-  const buyNow = async (product: Product) => {
-    if (!isWalletConnected) {
-      toast({
-        title: "🔐 Wallet Required",
-        description: "Please connect your wallet to make a purchase",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (product.stock <= 0) {
-      toast({
-        title: "❌ Out of Stock",
-        description: "This product is currently out of stock",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsPurchasing(true);
-
-      // Get connected wallet
-      const starknet = (window as any).starknet;
-      if (!starknet?.isConnected) {
-        toast({
-          title: "❌ Wallet Not Connected",
-          description: "Please connect your wallet first",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Initialize provider and contract with wallet
-      const provider = new Provider({
-        nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`,
-      });
-
-      const contract = new Contract(
-        StoreAbi[0],
-        STORE_CONTRACT_ADDRESS,
-        starknet.account // Use connected wallet account
-      );
-
-      // Convert USD price back to cents for contract call
-      const priceInCents = Math.round(product.price * 100);
-
-      toast({
-        title: "🔄 Processing Purchase...",
-        description: "Calculating STRK amount using live oracle pricing...",
-      });
-
-      console.log("Calling buy_product with:", {
-        productId: product.id,
-        quantity: 1,
-        expectedPrice: priceInCents,
-      });
-
-      // Call buy_product function with live oracle pricing
-      // The contract will automatically convert USD to STRK using Pragma Oracle
-      const result = await contract.buy_product(
-        product.id,
-        1, // quantity
-        priceInCents // expected_price in cents
-      );
-
-      console.log("Transaction result:", result);
-
-      // Wait for transaction confirmation
-      await provider.waitForTransaction(result.transaction_hash);
-
-      // Update local state to reflect purchase
-      setProducts((prevProducts) =>
-        prevProducts.map((p) =>
-          p.id === product.id ? { ...p, stock: p.stock - 1 } : p
-        )
-      );
-
-      toast({
-        title: "🎉 Purchase Successful!",
-        description: `Successfully purchased ${product.name} with STRK tokens at live market rate!`,
-      });
-    } catch (error: any) {
-      console.error("Purchase error:", error);
-
-      let errorMessage = "Transaction failed. Please try again.";
-
-      if (error.message?.includes("insufficient")) {
-        errorMessage = "Insufficient STRK balance for this purchase";
-      } else if (error.message?.includes("allowance")) {
-        errorMessage = "Please approve STRK token spending first";
-      } else if (error.message?.includes("quantity")) {
-        errorMessage = "Insufficient product stock";
-      } else if (error.message?.includes("rejected")) {
-        errorMessage = "Transaction was rejected by user";
-      }
-
-      toast({
-        title: "❌ Purchase Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsPurchasing(false);
-    }
-  };
+  // Buy functionality has been moved to the BuyNowButton component
 
   return (
     <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -433,14 +328,13 @@ const Product = () => {
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     Add to Cart
                   </Button>
-                  <Button
-                    onClick={() => buyNow(product)}
-                    className="w-full h-11 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-orange-500/25 transition-all duration-300 transform hover:scale-105"
-                    disabled={product.stock === 0}
-                  >
-                    <Zap className="h-4 w-4 mr-2" />
-                    Buy Now
-                  </Button>
+                  <BuyNowButton 
+                    product={product}
+                    onPurchaseSuccess={() => {
+                      // Refresh products after successful purchase
+                      window.location.reload() // Simple refresh for now
+                    }}
+                  />
                 </CardFooter>
               </Card>
             ))
