@@ -12,7 +12,7 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Contract, Provider, constants } from "starknet";
+import { Contract, Provider, constants, shortString } from "starknet";
 import { StoreAbi } from "@/constants/abi";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
 import BuyNowButton from "@/components/BuyNowButton";
@@ -197,15 +197,42 @@ const Product = () => {
         console.log("Contract response:", response);
 
         // Transform the contract response to match our Product interface
-        const formattedProducts: Product[] = response.map((item: any) => ({
-          id: Number(item.id.toString()),
-          name: item.productname.toString(),
-          price: Number(item.price.toString()) / 100, // Convert cents to dollars
-          image: item.Img.toString(),
-          description: `High-quality product with ID ${item.id}`,
-          stock: Number(item.quantity.toString()),
-          featured: Number(item.id.toString()) <= 2, // Mark first 2 as featured
-        }));
+        const formattedProducts: Product[] = response.map((item: any) => {
+          // Decode felt252 values back to strings
+          let productName = "Unknown Product";
+          let imageUrl = "/placeholder.svg?height=100&width=100";
+          
+          try {
+            // Decode the felt252 product name
+            productName = shortString.decodeShortString(item.productname.toString());
+          } catch (error) {
+            console.warn(`Failed to decode product name for item ${item.id}:`, error);
+          }
+          
+          try {
+            // Decode the felt252 image URL
+            imageUrl = shortString.decodeShortString(item.Img.toString());
+          } catch (error) {
+            console.warn(`Failed to decode image URL for item ${item.id}:`, error);
+          }
+          
+          console.log(`Product ${item.id} decoded:`, {
+            originalName: item.productname.toString(),
+            decodedName: productName,
+            originalImage: item.Img.toString(),
+            decodedImage: imageUrl
+          });
+          
+          return {
+            id: Number(item.id.toString()),
+            name: productName,
+            price: Number(item.price.toString()) / 100, // Convert cents to dollars
+            image: imageUrl,
+            description: `High-quality product: ${productName}`,
+            stock: Number(item.quantity.toString()),
+            featured: Number(item.id.toString()) <= 2, // Mark first 2 as featured
+          };
+        });
 
         setProducts(formattedProducts);
 

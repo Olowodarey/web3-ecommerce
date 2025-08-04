@@ -1,18 +1,18 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Edit, Trash2, BarChart3, Package, Users, DollarSign, ShoppingBag, Wallet } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Edit, Trash2, BarChart3, Package, Users, DollarSign, ShoppingBag, Wallet, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useAccount, useDisconnect } from "@starknet-react/core"
+import AddProductDialog from "@/components/admin/AddProductDialog"
 
 interface Product {
   id: number
@@ -34,6 +34,42 @@ interface Sale {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter()
+  const { account, address, status, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
+  
+  // Admin wallet addresses (should match the ones in login)
+  const adminWallets = [
+    "0x024bd0E4A658FA8655B7D7E4e0a625D36F885639Ace3F45732F7097f0bB8c6E9",
+    "0xabcdef1234567890abcdef1234567890abcdef12",
+    "0x9876543210fedcba9876543210fedcba98765432",
+  ]
+
+  // Check if current wallet is admin
+  const isAdminWallet = address && adminWallets.map(addr => addr.toLowerCase()).includes(address.toLowerCase())
+
+  // Redirect to login if not connected or not admin
+  useEffect(() => {
+    if (status !== 'connecting') {
+      if (!isConnected || !isAdminWallet) {
+        router.push('/admin/login')
+      }
+    }
+  }, [isConnected, isAdminWallet, status, router])
+
+  const handleDisconnect = () => {
+    disconnect()
+    toast({
+      title: "👋 Wallet Disconnected",
+      description: "You have been logged out of the admin dashboard",
+    })
+    router.push('/admin/login')
+  }
+
+  const shortenAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+  }
+
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -91,42 +127,14 @@ export default function AdminDashboard() {
     },
   ])
 
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false)
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    description: "",
-    stock: "",
-    image: "",
-  })
-
-  const handleAddProduct = () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.stock) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      })
-      return
-    }
-
+  const handleAddProduct = (productData: Omit<Product, 'id' | 'sales'>) => {
     const product: Product = {
       id: Date.now(),
-      name: newProduct.name,
-      price: Number.parseFloat(newProduct.price),
-      description: newProduct.description,
-      stock: Number.parseInt(newProduct.stock),
+      ...productData,
       sales: 0,
-      image: newProduct.image || "/placeholder.svg?height=100&width=100",
     }
 
     setProducts([...products, product])
-    setNewProduct({ name: "", price: "", description: "", stock: "", image: "" })
-    setIsAddProductOpen(false)
-    toast({
-      title: "Success",
-      description: "Product added successfully",
-    })
   }
 
   const handleUpdateStock = (id: number, newStock: number) => {
@@ -180,20 +188,50 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-right">
-                <div className="font-medium text-white">Admin Wallet</div>
-                <div className="text-gray-400 font-mono text-xs">0x1234...5678</div>
-              </div>
-              <Button asChild variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
-                <Link href="/" className="flex items-center space-x-2">
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>Back to Store</span>
-                </Link>
-              </Button>
-              <Badge className="bg-green-600/20 text-green-400 border-green-600/30">
-                <Wallet className="h-3 w-3 mr-1" />
-                Connected
-              </Badge>
+              {isConnected && address ? (
+                <>
+                  <div className="text-sm text-right">
+                    <div className="font-medium text-white">Admin Wallet</div>
+                    <div className="text-gray-400 font-mono text-xs">{shortenAddress(address)}</div>
+                  </div>
+                  <Button asChild variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
+                    <Link href="/" className="flex items-center space-x-2">
+                      <ShoppingBag className="h-4 w-4" />
+                      <span>Back to Store</span>
+                    </Link>
+                  </Button>
+                  <Button 
+                    onClick={handleDisconnect}
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-white hover:bg-gray-800"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    <span>Logout</span>
+                  </Button>
+                  <Badge className="bg-green-600/20 text-green-400 border-green-600/30">
+                    <Wallet className="h-3 w-3 mr-1" />
+                    Connected
+                  </Badge>
+                </>
+              ) : (
+                <>
+                  <div className="text-sm text-right">
+                    <div className="font-medium text-white">No Wallet</div>
+                    <div className="text-gray-400 font-mono text-xs">Not Connected</div>
+                  </div>
+                  <Button asChild variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
+                    <Link href="/admin/login" className="flex items-center space-x-2">
+                      <Wallet className="h-4 w-4" />
+                      <span>Connect Wallet</span>
+                    </Link>
+                  </Button>
+                  <Badge className="bg-red-600/20 text-red-400 border-red-600/30">
+                    <Wallet className="h-3 w-3 mr-1" />
+                    Disconnected
+                  </Badge>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -263,87 +301,7 @@ export default function AdminDashboard() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-white">Product Management</CardTitle>
-                  <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-orange-500 hover:bg-orange-600">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Product
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-gray-900 border-gray-800">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">Add New Product</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="name" className="text-gray-300">
-                            Product Name
-                          </Label>
-                          <Input
-                            id="name"
-                            value={newProduct.name}
-                            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                            placeholder="Enter product name"
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="price" className="text-gray-300">
-                            Price (ETH)
-                          </Label>
-                          <Input
-                            id="price"
-                            type="number"
-                            step="0.001"
-                            value={newProduct.price}
-                            onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                            placeholder="0.000"
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="stock" className="text-gray-300">
-                            Stock Quantity
-                          </Label>
-                          <Input
-                            id="stock"
-                            type="number"
-                            value={newProduct.stock}
-                            onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                            placeholder="Enter stock quantity"
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="description" className="text-gray-300">
-                            Description
-                          </Label>
-                          <Textarea
-                            id="description"
-                            value={newProduct.description}
-                            onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                            placeholder="Enter product description"
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="image" className="text-gray-300">
-                            Image URL
-                          </Label>
-                          <Input
-                            id="image"
-                            value={newProduct.image}
-                            onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                            placeholder="Enter image URL (optional)"
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                        <Button onClick={handleAddProduct} className="w-full bg-orange-500 hover:bg-orange-600">
-                          Add Product
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <AddProductDialog onAddProduct={handleAddProduct} />
                 </div>
               </CardHeader>
               <CardContent>
