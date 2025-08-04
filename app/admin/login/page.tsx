@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,30 +8,47 @@ import { Badge } from "@/components/ui/badge"
 import { Shield, ArrowLeft, Wallet, CheckCircle, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { toast } from "@/hooks/use-toast"
+import { useAccount, useDisconnect } from "@starknet-react/core"
+import WalletConnectDialog from "@/components/connectwallet/WalletConnectDialog"
 
 export default function AdminLogin() {
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState("")
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
   const router = useRouter()
+  const { account, address, status } = useAccount()
+  const { disconnect } = useDisconnect()
 
+  const isWalletConnected = status === 'connected'
+  const walletAddress = address || ''
+
+  // Admin wallet addresses (in production, these should be stored securely)
   const adminWallets = [
-    "0x1234567890abcdef1234567890abcdef12345678",
+    "0x024bd0E4A658FA8655B7D7E4e0a625D36F885639Ace3F45732F7097f0bB8c6E9",
     "0xabcdef1234567890abcdef1234567890abcdef12",
     "0x9876543210fedcba9876543210fedcba98765432",
   ]
 
-  const connectWallet = async () => {
-    setIsConnecting(true)
+  // Function to normalize address for comparison
+  const normalizeAddress = (address: string): string => {
+    return address.toLowerCase().trim()
+  }
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      const mockAddress = "0x1234567890abcdef1234567890abcdef12345678"
-      setWalletAddress(mockAddress)
-      setIsWalletConnected(true)
-
-      if (adminWallets.includes(mockAddress)) {
+  // Effect to handle wallet connection and admin verification
+  useEffect(() => {
+    if (isWalletConnected && walletAddress && !isVerifying) {
+      setIsVerifying(true)
+      
+      // Normalize addresses for comparison
+      const normalizedWalletAddress = normalizeAddress(walletAddress)
+      const normalizedAdminWallets = adminWallets.map(addr => normalizeAddress(addr))
+      
+      console.log('Connected wallet address:', walletAddress)
+      console.log('Normalized wallet address:', normalizedWalletAddress)
+      console.log('Admin wallets:', adminWallets)
+      console.log('Normalized admin wallets:', normalizedAdminWallets)
+      
+      // Check if connected wallet is an admin wallet
+      if (normalizedAdminWallets.includes(normalizedWalletAddress)) {
         toast({
           title: "🎉 Admin Access Granted",
           description: "Welcome to the admin dashboard",
@@ -46,23 +63,32 @@ export default function AdminLogin() {
           description: "This wallet does not have admin privileges",
           variant: "destructive",
         })
-        setIsWalletConnected(false)
-        setWalletAddress("")
+        
+        // Disconnect the wallet if not admin
+        setTimeout(() => {
+          disconnect()
+          setIsVerifying(false)
+        }, 2000)
       }
-    } catch (error) {
-      toast({
-        title: "❌ Connection Failed",
-        description: "Failed to connect wallet. Please try again.",
-        variant: "destructive",
-      })
     }
+  }, [isWalletConnected, walletAddress, adminWallets, router, disconnect, isVerifying])
 
-    setIsConnecting(false)
+  const handleConnectWallet = () => {
+    setIsWalletDialogOpen(true)
+  }
+
+  const handleDisconnect = () => {
+    disconnect()
+    setIsVerifying(false)
+    toast({
+      title: "👋 Wallet Disconnected",
+      description: "Your wallet has been disconnected",
+    })
   }
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Clean Background with Subtle Glow Effects */}
+     
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
@@ -111,16 +137,21 @@ export default function AdminLogin() {
                   <div className="text-center">
                     <p className="text-sm text-gray-400 mb-6">Connect your Starknet wallet to verify admin access</p>
                     <Button
-                      onClick={connectWallet}
+                      onClick={handleConnectWallet}
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-orange-500/25 transition-all duration-300 transform hover:scale-105 rounded-xl"
-                      disabled={isConnecting}
+                      disabled={status === 'connecting' || isVerifying}
                       size="lg"
                     >
                       <Wallet className="h-5 w-5 mr-2" />
-                      {isConnecting ? (
+                      {status === 'connecting' ? (
                         <>
                           <Sparkles className="h-5 w-5 mr-2 animate-spin" />
                           Connecting...
+                        </>
+                      ) : isVerifying ? (
+                        <>
+                          <Sparkles className="h-5 w-5 mr-2 animate-spin" />
+                          Verifying...
                         </>
                       ) : (
                         "Connect Starknet Wallet"
@@ -149,10 +180,10 @@ export default function AdminLogin() {
                   <div className="p-6 bg-blue-500/10 rounded-xl border border-blue-500/30 backdrop-blur-sm">
                     <p className="text-sm text-blue-300 mb-2 font-medium">
                       <Sparkles className="h-4 w-4 inline mr-2" />
-                      Demo Mode:
+                      Admin Access:
                     </p>
                     <p className="text-xs text-blue-400">
-                      This demo will simulate connecting with an admin wallet address
+                      Only authorized admin wallets can access the dashboard
                     </p>
                   </div>
                 </div>
@@ -170,6 +201,15 @@ export default function AdminLogin() {
                         {walletAddress}
                       </p>
                     </div>
+
+                    <Button
+                      onClick={handleDisconnect}
+                      variant="outline"
+                      className="w-full mt-4 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
+                      size="sm"
+                    >
+                      Disconnect Wallet
+                    </Button>
 
                     <p className="text-sm text-gray-400 mt-6 flex items-center justify-center">
                       <Sparkles className="h-4 w-4 mr-2 animate-spin" />
@@ -195,6 +235,12 @@ export default function AdminLogin() {
           </div>
         </div>
       </div>
+
+      {/* Wallet Connect Dialog */}
+      <WalletConnectDialog 
+        isOpen={isWalletDialogOpen} 
+        setIsOpen={setIsWalletDialogOpen} 
+      />
     </div>
   )
 }
