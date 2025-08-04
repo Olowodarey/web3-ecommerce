@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { Contract, Provider, constants, shortString } from "starknet";
 import { StoreAbi } from "@/constants/abi";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
+import { getIPFSUrl, isValidIPFSHash } from "@/lib/pinata";
 import BuyNowButton from "@/components/BuyNowButton";
 
 interface Product {
@@ -211,7 +212,15 @@ const Product = () => {
           
           try {
             // Decode the felt252 image URL
-            imageUrl = shortString.decodeShortString(item.Img.toString());
+            const decodedImage = shortString.decodeShortString(item.Img.toString());
+            
+            // Check if it's an IPFS hash and convert to URL
+            if (isValidIPFSHash(decodedImage)) {
+              imageUrl = getIPFSUrl(decodedImage);
+            } else {
+              // Regular URL or fallback
+              imageUrl = decodedImage;
+            }
           } catch (error) {
             console.warn(`Failed to decode image URL for item ${item.id}:`, error);
           }
