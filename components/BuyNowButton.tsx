@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
 import { Zap, Loader2 } from 'lucide-react'
-import { Contract, Provider } from 'starknet'
+import { Contract, Provider, constants } from 'starknet'
+import { useAccount, useProvider } from '@starknet-react/core'
 import { StoreAbi } from '@/constants/abi'
 import { STORE_CONTRACT_ADDRESS } from '@/constants'
+import { useWallet } from '@/contexts/WalletContext'
 
 interface Product {
   id: number
@@ -24,6 +26,9 @@ interface BuyNowButtonProps {
 
 export default function BuyNowButton({ product, onPurchaseSuccess }: BuyNowButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false)
+  const { isWalletConnected } = useWallet()
+  const { account } = useAccount()
+  const { provider } = useProvider()
 
   const buyNow = async (product: Product) => {
     if (product.stock === 0) {
@@ -38,15 +43,33 @@ export default function BuyNowButton({ product, onPurchaseSuccess }: BuyNowButto
     setIsProcessing(true)
 
     try {
-      // Get connected wallet
-      const starknet = (window as any).starknet
-      if (!starknet?.isConnected) {
+      // Check wallet connection using global context
+      if (!isWalletConnected) {
         toast({
           title: "🔐 Wallet Required",
-          description: "Please connect your wallet to make a purchase",
+          description: "Please connect your wallet using the button in the top-right corner first.",
           variant: "destructive",
         })
         return
+      }
+      
+      // Check if account is available from starknet-react, fallback to window.starknet
+      let walletAccount = account
+      
+      if (!walletAccount) {
+        // Fallback to window.starknet if starknet-react account not available
+        const starknet = (window as any).starknet
+        if (starknet?.account) {
+          walletAccount = starknet.account
+          console.log('Using fallback wallet account from window.starknet')
+        } else {
+          toast({
+            title: "❌ Wallet Connection Failed",
+            description: "Please ensure your wallet is properly connected",
+            variant: "destructive",
+          })
+          return
+        }
       }
 
       toast({
@@ -54,15 +77,12 @@ export default function BuyNowButton({ product, onPurchaseSuccess }: BuyNowButto
         description: "Calculating STRK amount using live oracle pricing...",
       })
 
-      // Initialize provider and contract with wallet
-      const provider = new Provider({
-        nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`,
-      })
+      // Use provider from starknet-react context
 
       const contract = new Contract(
         StoreAbi[0],
         STORE_CONTRACT_ADDRESS,
-        starknet.account // Use connected wallet account
+        walletAccount // Use connected wallet account (starknet-react or fallback)
       )
 
       // Convert USD price back to cents for contract call

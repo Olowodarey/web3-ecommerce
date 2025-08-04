@@ -1,37 +1,32 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  useAccount,
-  useDisconnect,
-  
-} from "@starknet-react/core";
 import { shortenAddress } from "@/lib/utils";
 import { UserCircle2, ChevronDown, LogOut } from "lucide-react";
+import { useWallet } from "@/contexts/WalletContext";
 
 const Account = () => {
-  const { address, status } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { isWalletConnected, walletAddress, connectWallet, disconnectWallet } = useWallet();
   const [displayAddress, setDisplayAddress] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 
   useEffect(() => {
-    if (status === "disconnected") {
+    if (!isWalletConnected) {
       setDisplayAddress("");
-    } else if (status === "connected" && address) {
+    } else if (isWalletConnected && walletAddress) {
       // Format the address for display (e.g., 0x1234...5678)
-      setDisplayAddress(shortenAddress(address));
+      setDisplayAddress(shortenAddress(walletAddress));
     }
-  }, [address, status]);
+  }, [isWalletConnected, walletAddress]);
 
   const handleDisconnect = () => {
-    disconnect();
+    disconnectWallet();
     setIsDropdownOpen(false);
   };
 
   return (
     <div className="relative">
-      {status === "connected" && address ? (
+      {isWalletConnected && walletAddress ? (
         <>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -70,7 +65,7 @@ const Account = () => {
                 <p className="text-xs text-gray-500">
                   View on
                   <a 
-                    href={`https://starkscan.co/contract/${address}`} 
+                    href={`https://starkscan.co/contract/${walletAddress}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="ml-1 text-blue-400 hover:underline"

@@ -1,33 +1,36 @@
 "use client";
 import React from "react";
  
-import { sepolia, mainnet } from "@starknet-react/chains";
+import { sepolia } from "@starknet-react/chains";
 import {
   StarknetConfig,
-  publicProvider,
+  jsonRpcProvider,
   argent,
   braavos,
-  useInjectedConnectors,
   voyager
 } from "@starknet-react/core";
- 
+
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
-  const { connectors } = useInjectedConnectors({
-    // Show these connectors if the user has no connector installed.
-    recommended: [
-      argent(),
-      braavos(),
-    ],
-    // Hide recommended connectors if the user has any connector installed.
-    includeRecommended: "onlyIfNoConnectors",
-    // Randomize the order of the connectors.
-    order: "random"
+  const connectors = [
+    argent(),
+    braavos(),
+  ];
+
+  const provider = jsonRpcProvider({
+    rpc: () => {
+      return {
+        nodeUrl: "https://starknet-sepolia.blastapi.io/cb15156d-9e8d-4a8b-aa9a-81d8de0e09a7/rpc/v0_8",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+    },
   });
  
   return (
     <StarknetConfig
-      chains={[mainnet, sepolia]}
-      provider={publicProvider()}
+      chains={[sepolia]}
+      provider={provider}
       connectors={connectors}
       explorer={voyager}
     >
