@@ -69,6 +69,20 @@ export const StoreAbi = [
       ]
     },
     {
+      "type": "struct",
+      "name": "core::integer::u256",
+      "members": [
+        {
+          "name": "low",
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "high",
+          "type": "core::integer::u128"
+        }
+      ]
+    },
+    {
       "type": "enum",
       "name": "core::bool",
       "variants": [
@@ -163,6 +177,10 @@ export const StoreAbi = [
             {
               "name": "expected_price",
               "type": "core::integer::u32"
+            },
+            {
+              "name": "payment_amount",
+              "type": "core::integer::u256"
             }
           ],
           "outputs": [
@@ -171,6 +189,28 @@ export const StoreAbi = [
             }
           ],
           "state_mutability": "external"
+        },
+        {
+          "type": "function",
+          "name": "get_token_address",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "get_oracle_address",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "state_mutability": "view"
         }
       ]
     },
@@ -460,6 +500,10 @@ export const StoreAbi = [
         {
           "name": "token_address",
           "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "name": "oracle_address",
+          "type": "core::starknet::contract_address::ContractAddress"
         }
       ]
     },
@@ -651,20 +695,6 @@ export const StoreAbi = [
           "name": "Upgraded",
           "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
           "kind": "nested"
-        }
-      ]
-    },
-    {
-      "type": "struct",
-      "name": "core::integer::u256",
-      "members": [
-        {
-          "name": "low",
-          "type": "core::integer::u128"
-        },
-        {
-          "name": "high",
-          "type": "core::integer::u128"
         }
       ]
     },

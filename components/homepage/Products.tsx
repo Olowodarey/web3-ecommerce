@@ -180,7 +180,7 @@ const Product = () => {
 
         // Initialize Starknet provider
         const provider = new Provider({
-          nodeUrl: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
+          nodeUrl: "https://starknet-sepolia.blastapi.io/cb15156d-9e8d-4a8b-aa9a-81d8de0e09a7/rpc/v0_8",
         });
 
         // Initialize contract
@@ -335,6 +335,7 @@ const Product = () => {
                   </Button>
                   <BuyNowButton 
                     product={product}
+                    strkPrice={strkPrice || undefined}
                     onPurchaseSuccess={() => {
                       // Refresh products after successful purchase
                       window.location.reload() // Simple refresh for now
