@@ -40,6 +40,7 @@ interface ContractProduct {
 }
 
 const Product = () => {
+  const [lastToastTime, setLastToastTime] = useState<number>(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -129,10 +130,14 @@ const Product = () => {
         setStrkPrice(livePrice);
         console.log("✅ Live STRK price updated:", `$${livePrice}`);
 
-        toast({
-          title: "📈 Live Price Updated",
-          description: `STRK price: $${livePrice.toFixed(4)}`,
-        });
+        const now = Date.now();
+        if (now - lastToastTime > 3600000) { // 1 hour in ms
+          toast({
+            title: "📈 Live Price Updated",
+            description: `STRK price: $${livePrice.toFixed(4)}`,
+          });
+          setLastToastTime(now);
+        }
       } else {
         throw new Error("Invalid API response structure");
       }
@@ -175,7 +180,7 @@ const Product = () => {
 
         // Initialize Starknet provider
         const provider = new Provider({
-          nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`,
+          nodeUrl: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
         });
 
         // Initialize contract

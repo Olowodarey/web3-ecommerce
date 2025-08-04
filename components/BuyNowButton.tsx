@@ -8,7 +8,7 @@ import { Contract, Provider, constants } from 'starknet'
 import { useAccount, useProvider } from '@starknet-react/core'
 import { StoreAbi } from '@/constants/abi'
 import { STORE_CONTRACT_ADDRESS } from '@/constants'
-import { useWallet } from '@/contexts/WalletContext'
+
 
 interface Product {
   id: number
@@ -26,9 +26,10 @@ interface BuyNowButtonProps {
 
 export default function BuyNowButton({ product, onPurchaseSuccess }: BuyNowButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false)
-  const { isWalletConnected } = useWallet()
-  const { account } = useAccount()
+  const { account, status } = useAccount()
   const { provider } = useProvider()
+  
+  const isWalletConnected = status === 'connected'
 
   const buyNow = async (product: Product) => {
     if (product.stock === 0) {

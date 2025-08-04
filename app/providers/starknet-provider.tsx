@@ -19,7 +19,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const provider = jsonRpcProvider({
     rpc: () => {
       return {
-        nodeUrl: "https://starknet-sepolia.blastapi.io/cb15156d-9e8d-4a8b-aa9a-81d8de0e09a7/rpc/v0_8",
+        nodeUrl: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
         headers: {
           "Content-Type": "application/json",
         },

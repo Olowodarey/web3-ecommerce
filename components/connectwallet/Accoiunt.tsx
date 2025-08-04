@@ -2,10 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { shortenAddress } from "@/lib/utils";
 import { UserCircle2, ChevronDown, LogOut } from "lucide-react";
-import { useWallet } from "@/contexts/WalletContext";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import { toast } from "@/hooks/use-toast";
 
 const Account = () => {
-  const { isWalletConnected, walletAddress, connectWallet, disconnectWallet } = useWallet();
+  const { address, status } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  
+  const isWalletConnected = status === 'connected';
+  const walletAddress = address || '';
   const [displayAddress, setDisplayAddress] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -20,7 +26,11 @@ const Account = () => {
   }, [isWalletConnected, walletAddress]);
 
   const handleDisconnect = () => {
-    disconnectWallet();
+    disconnect();
+    toast({
+      title: "👋 Wallet Disconnected",
+      description: "Your wallet has been disconnected",
+    });
     setIsDropdownOpen(false);
   };
 
@@ -59,6 +69,16 @@ const Account = () => {
                 >
                   <LogOut className="w-4 h-4 mr-2.5" />
                   Disconnect Wallet
+                </button>
+                <button
+                  onClick={() => {
+              if (connectors.length > 0) {
+                connect({ connector: connectors[0] });
+              }
+            }}
+                  className="flex items-center w-full px-4 py-3 text-sm text-blue-400 hover:bg-blue-500/10 transition-colors duration-150"
+                >
+                  Connect Wallet
                 </button>
               </div>
               <div className="px-4 py-2.5 bg-[#0f172a] text-center">
