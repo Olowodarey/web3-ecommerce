@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { useAccount, useSendTransaction } from "@starknet-react/core";
-import { shortString } from "starknet";
+import { shortString, byteArray } from "starknet";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
 import { uploadToPinata, getIPFSUrl, isValidIPFSHash } from "@/lib/pinata";
 
@@ -221,22 +221,19 @@ export default function AddProductDialog({
       );
       const quantity = Number.parseInt(newProduct.stock);
 
-      // Convert strings to felt252 format for Cairo using safe conversion
+      // Convert product name to felt252 and image URL to ByteArray
       const productNameFelt = safeEncodeToFelt252(newProduct.name, "Product Name");
-      const imageFelt = safeEncodeToFelt252(
-        newProduct.image || "/placeholder.svg?height=100&width=100",
-        "Image URL"
-      );
+      const imageUrl = newProduct.image || "/placeholder.svg?height=100&width=100";
+      const imageByteArray = byteArray.byteArrayFromString(imageUrl);
 
       console.log("String conversions:", {
         originalName: newProduct.name,
         convertedName: productNameFelt,
-        originalImage:
-          newProduct.image || "/placeholder.svg?height=100&width=100",
-        convertedImage: imageFelt,
+        originalImage: imageUrl,
+        convertedImageByteArray: imageByteArray,
       });
 
-      // Prepare the contract call
+      // Prepare the contract call with proper ByteArray serialization
       const calls = [
         {
           contractAddress: STORE_CONTRACT_ADDRESS,
@@ -245,7 +242,10 @@ export default function AddProductDialog({
             productNameFelt, // productname: felt252
             priceInCents, // price: u32 (in cents)
             quantity, // quantity: u32
-            imageFelt, // Img: felt252
+            imageByteArray.data.length, // ByteArray data length
+            ...imageByteArray.data, // ByteArray data array
+            imageByteArray.pending_word, // ByteArray pending word
+            imageByteArray.pending_word_len, // ByteArray pending word length
           ],
         },
       ];
@@ -254,7 +254,7 @@ export default function AddProductDialog({
         name: productNameFelt,
         price: priceInCents,
         quantity,
-        image: imageFelt,
+        image: imageByteArray,
       });
 
       // Send transaction

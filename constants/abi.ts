@@ -1,31 +1,31 @@
 export const StoreAbi = [
   [
     {
-      "type": "function",
       "name": "pause",
-      "inputs": [],
-      "outputs": [],
-      "state_mutability": "external"
-    },
-    {
       "type": "function",
-      "name": "unpause",
       "inputs": [],
       "outputs": [],
       "state_mutability": "external"
     },
     {
-      "type": "impl",
+      "name": "unpause",
+      "type": "function",
+      "inputs": [],
+      "outputs": [],
+      "state_mutability": "external"
+    },
+    {
       "name": "UpgradeableImpl",
+      "type": "impl",
       "interface_name": "openzeppelin_upgrades::interface::IUpgradeable"
     },
     {
-      "type": "interface",
       "name": "openzeppelin_upgrades::interface::IUpgradeable",
+      "type": "interface",
       "items": [
         {
-          "type": "function",
           "name": "upgrade",
+          "type": "function",
           "inputs": [
             {
               "name": "new_class_hash",
@@ -38,13 +38,31 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "impl",
       "name": "StoreImpl",
+      "type": "impl",
       "interface_name": "store::interfaces::Istore::IStore"
     },
     {
+      "name": "core::byte_array::ByteArray",
       "type": "struct",
+      "members": [
+        {
+          "name": "data",
+          "type": "core::array::Array::<core::bytes_31::bytes31>"
+        },
+        {
+          "name": "pending_word",
+          "type": "core::felt252"
+        },
+        {
+          "name": "pending_word_len",
+          "type": "core::integer::u32"
+        }
+      ]
+    },
+    {
       "name": "store::structs::Struct::Items",
+      "type": "struct",
       "members": [
         {
           "name": "id",
@@ -64,13 +82,13 @@ export const StoreAbi = [
         },
         {
           "name": "Img",
-          "type": "core::felt252"
+          "type": "core::byte_array::ByteArray"
         }
       ]
     },
     {
-      "type": "struct",
       "name": "core::integer::u256",
+      "type": "struct",
       "members": [
         {
           "name": "low",
@@ -83,8 +101,8 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "enum",
       "name": "core::bool",
+      "type": "enum",
       "variants": [
         {
           "name": "False",
@@ -97,12 +115,12 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "interface",
       "name": "store::interfaces::Istore::IStore",
+      "type": "interface",
       "items": [
         {
-          "type": "function",
           "name": "add_item",
+          "type": "function",
           "inputs": [
             {
               "name": "productname",
@@ -118,15 +136,15 @@ export const StoreAbi = [
             },
             {
               "name": "Img",
-              "type": "core::felt252"
+              "type": "core::byte_array::ByteArray"
             }
           ],
           "outputs": [],
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "get_item",
+          "type": "function",
           "inputs": [
             {
               "name": "productId",
@@ -141,8 +159,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "get_total_items",
+          "type": "function",
           "inputs": [],
           "outputs": [
             {
@@ -152,8 +170,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "get_all_items",
+          "type": "function",
           "inputs": [],
           "outputs": [
             {
@@ -163,8 +181,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "buy_product",
+          "type": "function",
           "inputs": [
             {
               "name": "productId",
@@ -191,8 +209,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "get_token_address",
+          "type": "function",
           "inputs": [],
           "outputs": [
             {
@@ -202,8 +220,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "get_oracle_address",
+          "type": "function",
           "inputs": [],
           "outputs": [
             {
@@ -211,21 +229,52 @@ export const StoreAbi = [
             }
           ],
           "state_mutability": "view"
+        },
+        {
+          "name": "get_contract_balance",
+          "type": "function",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::integer::u256"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "withdraw_tokens",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "amount",
+              "type": "core::integer::u256"
+            },
+            {
+              "name": "recipient",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::bool"
+            }
+          ],
+          "state_mutability": "external"
         }
       ]
     },
     {
-      "type": "impl",
       "name": "PausableImpl",
+      "type": "impl",
       "interface_name": "openzeppelin_security::interface::IPausable"
     },
     {
-      "type": "interface",
       "name": "openzeppelin_security::interface::IPausable",
+      "type": "interface",
       "items": [
         {
-          "type": "function",
           "name": "is_paused",
+          "type": "function",
           "inputs": [],
           "outputs": [
             {
@@ -237,13 +286,13 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "impl",
       "name": "AccessControlMixinImpl",
+      "type": "impl",
       "interface_name": "openzeppelin_access::accesscontrol::interface::AccessControlABI"
     },
     {
-      "type": "enum",
       "name": "openzeppelin_access::accesscontrol::interface::RoleStatus",
+      "type": "enum",
       "variants": [
         {
           "name": "NotGranted",
@@ -260,12 +309,12 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "interface",
       "name": "openzeppelin_access::accesscontrol::interface::AccessControlABI",
+      "type": "interface",
       "items": [
         {
-          "type": "function",
           "name": "has_role",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -284,8 +333,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "get_role_admin",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -300,8 +349,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "grant_role",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -316,8 +365,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "revoke_role",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -332,8 +381,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "renounce_role",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -348,8 +397,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "hasRole",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -368,8 +417,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "getRoleAdmin",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -384,8 +433,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "grantRole",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -400,8 +449,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "revokeRole",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -416,8 +465,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "renounceRole",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -432,8 +481,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "get_role_status",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -452,8 +501,8 @@ export const StoreAbi = [
           "state_mutability": "view"
         },
         {
-          "type": "function",
           "name": "grant_role_with_delay",
+          "type": "function",
           "inputs": [
             {
               "name": "role",
@@ -472,8 +521,8 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
-          "type": "function",
           "name": "supports_interface",
+          "type": "function",
           "inputs": [
             {
               "name": "interface_id",
@@ -490,8 +539,8 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "constructor",
       "name": "constructor",
+      "type": "constructor",
       "inputs": [
         {
           "name": "default_admin",
@@ -508,267 +557,267 @@ export const StoreAbi = [
       ]
     },
     {
-      "type": "event",
+      "kind": "struct",
       "name": "openzeppelin_security::pausable::PausableComponent::Paused",
-      "kind": "struct",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "account",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         }
       ]
     },
     {
-      "type": "event",
+      "kind": "struct",
       "name": "openzeppelin_security::pausable::PausableComponent::Unpaused",
-      "kind": "struct",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "account",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         }
       ]
     },
     {
-      "type": "event",
+      "kind": "enum",
       "name": "openzeppelin_security::pausable::PausableComponent::Event",
-      "kind": "enum",
+      "type": "event",
       "variants": [
         {
+          "kind": "nested",
           "name": "Paused",
-          "type": "openzeppelin_security::pausable::PausableComponent::Paused",
-          "kind": "nested"
+          "type": "openzeppelin_security::pausable::PausableComponent::Paused"
         },
         {
+          "kind": "nested",
           "name": "Unpaused",
-          "type": "openzeppelin_security::pausable::PausableComponent::Unpaused",
-          "kind": "nested"
+          "type": "openzeppelin_security::pausable::PausableComponent::Unpaused"
         }
       ]
     },
     {
-      "type": "event",
+      "kind": "struct",
       "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGranted",
-      "kind": "struct",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "role",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         },
         {
+          "kind": "data",
           "name": "account",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         },
         {
+          "kind": "data",
           "name": "sender",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         }
       ]
     },
     {
-      "type": "event",
+      "kind": "struct",
       "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGrantedWithDelay",
-      "kind": "struct",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "role",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         },
         {
+          "kind": "data",
           "name": "account",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         },
         {
+          "kind": "data",
           "name": "sender",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         },
         {
+          "kind": "data",
           "name": "delay",
-          "type": "core::integer::u64",
-          "kind": "data"
+          "type": "core::integer::u64"
         }
       ]
     },
     {
-      "type": "event",
+      "kind": "struct",
       "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleRevoked",
-      "kind": "struct",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "role",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         },
         {
+          "kind": "data",
           "name": "account",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         },
         {
+          "kind": "data",
           "name": "sender",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         }
       ]
     },
     {
-      "type": "event",
-      "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleAdminChanged",
       "kind": "struct",
+      "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleAdminChanged",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "role",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         },
         {
+          "kind": "data",
           "name": "previous_admin_role",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         },
         {
+          "kind": "data",
           "name": "new_admin_role",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         }
       ]
     },
     {
-      "type": "event",
-      "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::Event",
       "kind": "enum",
+      "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::Event",
+      "type": "event",
       "variants": [
         {
+          "kind": "nested",
           "name": "RoleGranted",
-          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGranted",
-          "kind": "nested"
+          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGranted"
         },
         {
+          "kind": "nested",
           "name": "RoleGrantedWithDelay",
-          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGrantedWithDelay",
-          "kind": "nested"
+          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGrantedWithDelay"
         },
         {
+          "kind": "nested",
           "name": "RoleRevoked",
-          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleRevoked",
-          "kind": "nested"
+          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleRevoked"
         },
         {
+          "kind": "nested",
           "name": "RoleAdminChanged",
-          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleAdminChanged",
-          "kind": "nested"
+          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleAdminChanged"
         }
       ]
     },
     {
-      "type": "event",
-      "name": "openzeppelin_introspection::src5::SRC5Component::Event",
       "kind": "enum",
+      "name": "openzeppelin_introspection::src5::SRC5Component::Event",
+      "type": "event",
       "variants": []
     },
     {
-      "type": "event",
+      "kind": "struct",
       "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-      "kind": "struct",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "class_hash",
-          "type": "core::starknet::class_hash::ClassHash",
-          "kind": "data"
+          "type": "core::starknet::class_hash::ClassHash"
         }
       ]
     },
     {
-      "type": "event",
-      "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
       "kind": "enum",
+      "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+      "type": "event",
       "variants": [
         {
+          "kind": "nested",
           "name": "Upgraded",
-          "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-          "kind": "nested"
+          "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded"
         }
       ]
     },
     {
-      "type": "event",
-      "name": "store::Events::Events::PurchaseMade",
       "kind": "struct",
+      "name": "store::Events::Events::PurchaseMade",
+      "type": "event",
       "members": [
         {
+          "kind": "data",
           "name": "buyer",
-          "type": "core::starknet::contract_address::ContractAddress",
-          "kind": "data"
+          "type": "core::starknet::contract_address::ContractAddress"
         },
         {
+          "kind": "data",
           "name": "product_id",
-          "type": "core::integer::u32",
-          "kind": "data"
+          "type": "core::integer::u32"
         },
         {
+          "kind": "data",
           "name": "product_name",
-          "type": "core::felt252",
-          "kind": "data"
+          "type": "core::felt252"
         },
         {
+          "kind": "data",
           "name": "quantity",
-          "type": "core::integer::u32",
-          "kind": "data"
+          "type": "core::integer::u32"
         },
         {
+          "kind": "data",
           "name": "total_price_cents",
-          "type": "core::integer::u32",
-          "kind": "data"
+          "type": "core::integer::u32"
         },
         {
+          "kind": "data",
           "name": "total_price_tokens",
-          "type": "core::integer::u256",
-          "kind": "data"
+          "type": "core::integer::u256"
         },
         {
+          "kind": "data",
           "name": "timestamp",
-          "type": "core::integer::u64",
-          "kind": "data"
+          "type": "core::integer::u64"
         }
       ]
     },
     {
-      "type": "event",
-      "name": "store::contract::store::Store::Event",
       "kind": "enum",
+      "name": "store::contract::store::Store::Event",
+      "type": "event",
       "variants": [
         {
+          "kind": "flat",
           "name": "PausableEvent",
-          "type": "openzeppelin_security::pausable::PausableComponent::Event",
-          "kind": "flat"
+          "type": "openzeppelin_security::pausable::PausableComponent::Event"
         },
         {
+          "kind": "flat",
           "name": "AccessControlEvent",
-          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::Event",
-          "kind": "flat"
+          "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::Event"
         },
         {
+          "kind": "flat",
           "name": "SRC5Event",
-          "type": "openzeppelin_introspection::src5::SRC5Component::Event",
-          "kind": "flat"
+          "type": "openzeppelin_introspection::src5::SRC5Component::Event"
         },
         {
+          "kind": "flat",
           "name": "UpgradeableEvent",
-          "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
-          "kind": "flat"
+          "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event"
         },
         {
+          "kind": "nested",
           "name": "PurchaseMade",
-          "type": "store::Events::Events::PurchaseMade",
-          "kind": "nested"
+          "type": "store::Events::Events::PurchaseMade"
         }
       ]
     }
