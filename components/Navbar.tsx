@@ -8,6 +8,7 @@ import { useAccount } from "@starknet-react/core";
 import WalletConnectDialog from "./connectwallet/WalletConnectDialog";
 import Account from "./connectwallet/Accoiunt";
 import Cartitems from "./cart/Cartitems";
+import ContractBalance from "./navbar/ContractBalance";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -60,6 +61,9 @@ const Navbar = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
+            {/* Contract Balance Display */}
+            <ContractBalance />
+            
             <div>
               {isConnected && account ? (
                 <Account />

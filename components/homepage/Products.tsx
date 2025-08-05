@@ -12,7 +12,7 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Contract, Provider, constants, shortString } from "starknet";
+import { Contract, Provider, constants, shortString, byteArray } from "starknet";
 import { StoreAbi } from "@/constants/abi";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
 import { getIPFSUrl, isValidIPFSHash } from "@/lib/pinata";
@@ -211,18 +211,32 @@ const Product = () => {
           }
           
           try {
-            // Decode the felt252 image URL
-            const decodedImage = shortString.decodeShortString(item.Img.toString());
+            // Debug: Log the raw image data
+            console.log(`🔍 Debug item ${item.id} image data:`, {
+              type: typeof item.Img,
+              value: item.Img,
+              toString: item.Img?.toString(),
+            });
+            
+            // ByteArray is automatically converted to string by Starknet library
+            // Based on starknet-supermarket repository approach
+            let decodedImage = item.Img.toString();
+            
+            console.log(`✅ Decoded image for item ${item.id}:`, decodedImage);
             
             // Check if it's an IPFS hash and convert to URL
             if (isValidIPFSHash(decodedImage)) {
               imageUrl = getIPFSUrl(decodedImage);
-            } else {
-              // Regular URL or fallback
+              console.log(`🌐 IPFS URL generated for item ${item.id}:`, imageUrl);
+            } else if (decodedImage && decodedImage !== "") {
+              // Regular URL
               imageUrl = decodedImage;
+              console.log(`🔗 Regular URL for item ${item.id}:`, imageUrl);
+            } else {
+              console.warn(`⚠️ Empty decoded image for item ${item.id}`);
             }
           } catch (error) {
-            console.warn(`Failed to decode image URL for item ${item.id}:`, error);
+            console.warn(`❌ Failed to decode image URL for item ${item.id}:`, error);
           }
           
           console.log(`Product ${item.id} decoded:`, {
@@ -284,7 +298,7 @@ const Product = () => {
     });
   };
 
-  // Buy functionality has been moved to the BuyNowButton component
+
 
   return (
     <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

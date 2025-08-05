@@ -13,6 +13,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAccount, useDisconnect } from "@starknet-react/core"
 import AddProductDialog from "@/components/admin/AddProductDialog"
+import WithdrawFunds from "@/components/admin/WithdrawFunds"
 
 interface Product {
   id: number
@@ -294,6 +295,9 @@ export default function AdminDashboard() {
             <TabsTrigger value="sales" className="data-[state=active]:bg-gray-800 data-[state=active]:text-white">
               Sales
             </TabsTrigger>
+            <TabsTrigger value="withdraw" className="data-[state=active]:bg-gray-800 data-[state=active]:text-white">
+              Withdraw Funds
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-6">
@@ -397,6 +401,10 @@ export default function AdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="withdraw" className="space-y-6">
+            <WithdrawFunds />
           </TabsContent>
         </Tabs>
       </div>

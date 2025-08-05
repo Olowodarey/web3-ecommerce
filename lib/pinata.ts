@@ -65,8 +65,27 @@ export function getIPFSUrl(ipfsHash: string): string {
   // Remove ipfs:// prefix if present
   const cleanHash = ipfsHash.replace(/^ipfs:\/\//, "");
   
-  const gateway = process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.pinata.cloud";
-  return `${gateway}/ipfs/${cleanHash}`;
+  // Use public IPFS gateway that doesn't require authentication
+  // Pinata's gateway.pinata.cloud requires auth, so use public gateway
+  return `https://ipfs.io/ipfs/${cleanHash}`;
+}
+
+// Convert IPFS CID to accessible URL using Pinata SDK (for server-side use)
+export async function getPinataGatewayUrl(ipfsHash: string): Promise<string> {
+  if (!ipfsHash) return "";
+  
+  try {
+    // Remove ipfs:// prefix if present
+    const cleanHash = ipfsHash.replace(/^ipfs:\/\//, "");
+    
+    // Use Pinata SDK to convert CID to gateway URL
+    const url = await pinata.gateways.public.convert(cleanHash);
+    return url;
+  } catch (error) {
+    console.error("Error converting CID to Pinata gateway URL:", error);
+    // Fallback to public IPFS gateway
+    return getIPFSUrl(ipfsHash);
+  }
 }
 
 // Validate IPFS hash format
