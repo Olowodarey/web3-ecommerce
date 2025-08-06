@@ -11,6 +11,8 @@ import { Contract, Provider } from 'starknet'
 import { StoreAbi } from '@/constants/abi'
 import { STORE_CONTRACT_ADDRESS } from '@/constants'
 import { MintReceiptButton } from '@/components/purchases/MintReceiptButton'
+import ViewNFTReceiptButton from '@/components/purchases/ViewNFTReceiptButton'
+import ViewTransactionButton from '@/components/purchases/ViewTransactionButton'
 
 interface Purchase {
   id: string
@@ -26,6 +28,7 @@ export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [mintedStatus, setMintedStatus] = useState<Record<string, boolean>>({})
 
   // Create contract instance with Provider like in Products.tsx
   const provider = new Provider({
@@ -75,6 +78,15 @@ export default function PurchasesPage() {
           
           console.log(`🔍 Formatted purchase ${purchaseId}:`, formattedPurchase)
           formattedPurchases.push(formattedPurchase)
+          
+          // Check if this purchase has been minted as NFT
+          try {
+            const isMinted = await contract.is_purchase_minted(parseInt(purchaseId, 10))
+            setMintedStatus(prev => ({ ...prev, [purchaseId]: Boolean(isMinted) }))
+          } catch (mintError) {
+            console.error(`Error checking mint status for purchase ${purchaseId}:`, mintError)
+            setMintedStatus(prev => ({ ...prev, [purchaseId]: false }))
+          }
         } catch (error) {
           console.error(`❌ Error fetching details for purchase ${purchaseIds[i]}:`, error)
           // Add a placeholder entry if we can't fetch details
@@ -220,13 +232,28 @@ export default function PurchasesPage() {
                     <div className="text-sm text-gray-600">
                       Transaction ID: {purchase.id}
                     </div>
-                    <MintReceiptButton 
-                      purchaseId={purchase.id}
-                      onMintSuccess={() => {
-                        // Optionally refresh purchases or show success message
-                        console.log('Receipt minted successfully for purchase:', purchase.id)
-                      }}
-                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <ViewNFTReceiptButton
+                        purchaseId={purchase.id}
+                        productId={purchase.product_id}
+                        quantity={purchase.quantity}
+                        totalPrice={purchase.total_price}
+                        isMinted={mintedStatus[purchase.id] || false}
+                      />
+                      <ViewTransactionButton
+                        purchaseId={purchase.id}
+                        purchaseTransactionHash={purchase.id} // Using purchase ID as placeholder - you can store actual tx hash
+                        mintTransactionHash={undefined} // Will be populated when NFT is minted
+                        isMinted={mintedStatus[purchase.id] || false}
+                      />
+                      <MintReceiptButton 
+                        purchaseId={purchase.id}
+                        onMintSuccess={() => {
+                          // Optionally refresh purchases or show success message
+                          console.log('Receipt minted successfully for purchase:', purchase.id)
+                        }}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
