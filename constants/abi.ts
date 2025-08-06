@@ -115,6 +115,62 @@ export const StoreAbi = [
       ]
     },
     {
+      "name": "store::structs::Struct::CartItem",
+      "type": "struct",
+      "members": [
+        {
+          "name": "product_id",
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "quantity",
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "expected_price",
+          "type": "core::integer::u32"
+        }
+      ]
+    },
+    {
+      "name": "store::structs::Struct::PurchaseReceipt",
+      "type": "struct",
+      "members": [
+        {
+          "name": "buyer",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "name": "product_id",
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "product_name",
+          "type": "core::felt252"
+        },
+        {
+          "name": "quantity",
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "total_price_cents",
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "total_price_tokens",
+          "type": "core::integer::u256"
+        },
+        {
+          "name": "timestamp",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "receipt_id",
+          "type": "core::integer::u256"
+        }
+      ]
+    },
+    {
       "name": "store::interfaces::Istore::IStore",
       "type": "interface",
       "items": [
@@ -209,6 +265,26 @@ export const StoreAbi = [
           "state_mutability": "external"
         },
         {
+          "name": "buy_multiple_products",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "cart_items",
+              "type": "core::array::Array::<store::structs::Struct::CartItem>"
+            },
+            {
+              "name": "total_payment_amount",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::bool"
+            }
+          ],
+          "state_mutability": "external"
+        },
+        {
           "name": "get_token_address",
           "type": "function",
           "inputs": [],
@@ -260,6 +336,97 @@ export const StoreAbi = [
             }
           ],
           "state_mutability": "external"
+        },
+        {
+          "name": "get_user_receipts",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::array::Array::<core::integer::u256>"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "mint_receipt",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "purchase_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::bool"
+            }
+          ],
+          "state_mutability": "external"
+        },
+        {
+          "name": "get_user_purchases",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::array::Array::<core::integer::u256>"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "get_purchase_count",
+          "type": "function",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::integer::u256"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "is_purchase_minted",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "purchase_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::bool"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "get_purchase_details",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "purchase_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "store::structs::Struct::PurchaseReceipt"
+            }
+          ],
+          "state_mutability": "view"
         }
       ]
     },
@@ -539,6 +706,220 @@ export const StoreAbi = [
       ]
     },
     {
+      "name": "ERC721MetadataImpl",
+      "type": "impl",
+      "interface_name": "openzeppelin_token::erc721::interface::IERC721Metadata"
+    },
+    {
+      "name": "openzeppelin_token::erc721::interface::IERC721Metadata",
+      "type": "interface",
+      "items": [
+        {
+          "name": "name",
+          "type": "function",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::byte_array::ByteArray"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "symbol",
+          "type": "function",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::byte_array::ByteArray"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "token_uri",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "token_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::byte_array::ByteArray"
+            }
+          ],
+          "state_mutability": "view"
+        }
+      ]
+    },
+    {
+      "name": "ERC721Impl",
+      "type": "impl",
+      "interface_name": "openzeppelin_token::erc721::interface::IERC721"
+    },
+    {
+      "name": "core::array::Span::<core::felt252>",
+      "type": "struct",
+      "members": [
+        {
+          "name": "snapshot",
+          "type": "@core::array::Array::<core::felt252>"
+        }
+      ]
+    },
+    {
+      "name": "openzeppelin_token::erc721::interface::IERC721",
+      "type": "interface",
+      "items": [
+        {
+          "name": "balance_of",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "account",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::integer::u256"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "owner_of",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "token_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "safe_transfer_from",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "from",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "to",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "token_id",
+              "type": "core::integer::u256"
+            },
+            {
+              "name": "data",
+              "type": "core::array::Span::<core::felt252>"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "name": "transfer_from",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "from",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "to",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "token_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "name": "approve",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "to",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "token_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "name": "set_approval_for_all",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "operator",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "approved",
+              "type": "core::bool"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "name": "get_approved",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "token_id",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "is_approved_for_all",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "owner",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "operator",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::bool"
+            }
+          ],
+          "state_mutability": "view"
+        }
+      ]
+    },
+    {
       "name": "constructor",
       "type": "constructor",
       "inputs": [
@@ -749,6 +1130,94 @@ export const StoreAbi = [
     },
     {
       "kind": "struct",
+      "name": "openzeppelin_token::erc721::erc721::ERC721Component::Transfer",
+      "type": "event",
+      "members": [
+        {
+          "kind": "key",
+          "name": "from",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "key",
+          "name": "to",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "key",
+          "name": "token_id",
+          "type": "core::integer::u256"
+        }
+      ]
+    },
+    {
+      "kind": "struct",
+      "name": "openzeppelin_token::erc721::erc721::ERC721Component::Approval",
+      "type": "event",
+      "members": [
+        {
+          "kind": "key",
+          "name": "owner",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "key",
+          "name": "approved",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "key",
+          "name": "token_id",
+          "type": "core::integer::u256"
+        }
+      ]
+    },
+    {
+      "kind": "struct",
+      "name": "openzeppelin_token::erc721::erc721::ERC721Component::ApprovalForAll",
+      "type": "event",
+      "members": [
+        {
+          "kind": "key",
+          "name": "owner",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "key",
+          "name": "operator",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "data",
+          "name": "approved",
+          "type": "core::bool"
+        }
+      ]
+    },
+    {
+      "kind": "enum",
+      "name": "openzeppelin_token::erc721::erc721::ERC721Component::Event",
+      "type": "event",
+      "variants": [
+        {
+          "kind": "nested",
+          "name": "Transfer",
+          "type": "openzeppelin_token::erc721::erc721::ERC721Component::Transfer"
+        },
+        {
+          "kind": "nested",
+          "name": "Approval",
+          "type": "openzeppelin_token::erc721::erc721::ERC721Component::Approval"
+        },
+        {
+          "kind": "nested",
+          "name": "ApprovalForAll",
+          "type": "openzeppelin_token::erc721::erc721::ERC721Component::ApprovalForAll"
+        }
+      ]
+    },
+    {
+      "kind": "struct",
       "name": "store::Events::Events::PurchaseMade",
       "type": "event",
       "members": [
@@ -813,6 +1282,11 @@ export const StoreAbi = [
           "kind": "flat",
           "name": "UpgradeableEvent",
           "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event"
+        },
+        {
+          "kind": "flat",
+          "name": "ERC721Event",
+          "type": "openzeppelin_token::erc721::erc721::ERC721Component::Event"
         },
         {
           "kind": "nested",

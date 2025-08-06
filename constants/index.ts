@@ -1,5 +1,8 @@
 export const STORE_CONTRACT_ADDRESS =
-  "0x074251f2dfa3dcfc88864f0b22f1d3d62a0f9dcbef14c949a3ad85a6674a84ee";
+  "0x00e1b4d66c610f381037a76fe0c60792616952eea58a0e1e648ec71b111d1bf8";
+
+// Export as CONTRACT_ADDRESS for backward compatibility
+export const CONTRACT_ADDRESS = STORE_CONTRACT_ADDRESS;
 
 export const STRK_TOKEN_ADDRESS =
   "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";

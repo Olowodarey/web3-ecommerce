@@ -47,7 +47,7 @@ const WithdrawFunds = () => {
 
       // Initialize contract
       const contract = new Contract(
-        StoreAbi[0],
+        StoreAbi,
         STORE_CONTRACT_ADDRESS,
         provider
       );

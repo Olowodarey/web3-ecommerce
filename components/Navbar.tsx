@@ -45,6 +45,13 @@ const Navbar = () => {
               <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
+              href="/purchases"
+              className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
+            >
+              My Purchases
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="#"
               className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
             >
