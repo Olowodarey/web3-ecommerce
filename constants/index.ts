@@ -1,5 +1,5 @@
 export const STORE_CONTRACT_ADDRESS =
-  "0x00e1b4d66c610f381037a76fe0c60792616952eea58a0e1e648ec71b111d1bf8";
+  "0x0190c874390d7a6ed8caa01acf6ea2020676eac050cdabc84c2fa69d75f31b7c";
 
 // Export as CONTRACT_ADDRESS for backward compatibility
 export const CONTRACT_ADDRESS = STORE_CONTRACT_ADDRESS;
