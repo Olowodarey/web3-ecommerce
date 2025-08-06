@@ -57,7 +57,7 @@ export default function ViewTransactionButton({
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700/50 hover:border-gray-500 backdrop-blur-sm"
       >
         <Hash className="h-4 w-4" />
         View Transaction

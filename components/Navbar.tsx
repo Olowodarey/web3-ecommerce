@@ -38,7 +38,7 @@ const Navbar = () => {
 
           <nav className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 items-center space-x-8">
             <Link
-              href="#"
+              href="/#"
               className="text-white hover:text-blue-400 transition-all duration-300 font-medium relative group py-2"
             >
               Products

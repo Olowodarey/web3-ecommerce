@@ -157,7 +157,7 @@ export function MintReceiptButton({ purchaseId, onMintSuccess }: MintReceiptButt
       disabled={isMinting || !isConnected || Boolean(isMinted)}
       size="sm"
       variant="outline"
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700/50 hover:border-gray-500 backdrop-blur-sm disabled:opacity-50"
     >
       {isMinting ? (
         <>
