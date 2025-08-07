@@ -17,6 +17,7 @@ import { StoreAbi } from "@/constants/abi";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
 import { getIPFSUrl, isValidIPFSHash } from "@/lib/pinata";
 import BuyNowButton from "@/components/BuyNowButton";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 
 interface Product {
   id: number;
@@ -28,9 +29,7 @@ interface Product {
   featured?: boolean;
 }
 
-interface CartItem extends Product {
-  quantity: number;
-}
+
 
 interface ContractProduct {
   id: number;
@@ -44,7 +43,7 @@ const Product = () => {
   const [lastToastTime, setLastToastTime] = useState<number>(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [cart, setCart] = useState<CartItem[]>([]);
+
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [strkPrice, setStrkPrice] = useState<number | null>(null);
@@ -278,25 +277,7 @@ const Product = () => {
     fetchProducts();
   }, []);
 
-  // Add to cart function
-  const addToCart = (product: Product) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prevCart, { ...product, quantity: 1 }];
-    });
 
-    toast({
-      title: "✨ Added to Cart",
-      description: `${product.name} has been added to your cart`,
-    });
-  };
 
 
 
@@ -374,15 +355,12 @@ const Product = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="p-6 pt-0 flex flex-col space-y-3">
-                  <Button
-                    onClick={() => addToCart(product)}
+                  <AddToCartButton
+                    product={product}
                     variant="outline"
                     className="w-full h-11 border-gray-600 bg-gray-800/80 text-white hover:bg-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105"
                     disabled={product.stock === 0}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
+                  />
                   <BuyNowButton 
                     product={product}
                     strkPrice={strkPrice || undefined}

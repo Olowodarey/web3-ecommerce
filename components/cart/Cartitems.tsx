@@ -11,23 +11,13 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  stock: number;
-  featured?: boolean;
-}
-
-interface CartItem extends Product {
-  quantity: number;
-}
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { updateQuantity, removeFromCart, clearCart } from "@/lib/features/cart/cartSlice";
+import type { Product, CartItem } from "@/lib/features/cart/cartSlice";
 
 const Cartitems = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const dispatch = useAppDispatch();
+  const { items: cart, totalItems, totalPrice } = useAppSelector((state) => state.cart);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [tokenBalance, setTokenBalance] = useState(1.5);
@@ -42,24 +32,20 @@ const Cartitems = () => {
     });
   };
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+  const handleUpdateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity === 0) {
-      setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+      dispatch(removeFromCart(id));
     } else {
-      setCart((prevCart) =>
-        prevCart.map((item) =>
-          item.id === id ? { ...item, quantity: newQuantity } : item
-        )
-      );
+      dispatch(updateQuantity({ id, quantity: newQuantity }));
     }
   };
 
   const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+    return totalItems;
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return totalPrice;
   };
 
   const buyNow = (product: Product) => {
@@ -109,7 +95,7 @@ const Cartitems = () => {
     }
 
     setTokenBalance((prev) => prev - total);
-    setCart([]);
+    dispatch(clearCart());
     setIsCartOpen(false);
     toast({
       title: "🎉 Order Successful",
@@ -171,7 +157,7 @@ const Cartitems = () => {
                       size="icon"
                       variant="outline"
                       className="border-gray-700 bg-gray-800/50 hover:bg-gray-700 w-8 h-8 transition-all duration-300"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                     >
                       <Minus className="h-3 w-3 text-white" />
                     </Button>
@@ -182,7 +168,7 @@ const Cartitems = () => {
                       size="icon"
                       variant="outline"
                       className="border-gray-700 bg-gray-800/50 hover:bg-gray-700 w-8 h-8 transition-all duration-300"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                     >
                       <Plus className="h-3 w-3 text-white" />
                     </Button>

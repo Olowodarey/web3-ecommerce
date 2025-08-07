@@ -39,36 +39,102 @@ const WithdrawFunds = () => {
   const fetchContractBalance = async () => {
     try {
       setIsLoadingBalance(true);
+      console.log("🔍 Starting contract balance fetch...");
+      console.log("📋 Contract Address:", STORE_CONTRACT_ADDRESS);
 
       // Initialize Starknet provider
       const provider = new Provider({
         nodeUrl: "https://starknet-sepolia.blastapi.io/cb15156d-9e8d-4a8b-aa9a-81d8de0e09a7/rpc/v0_8",
       });
 
-      // Initialize contract
+      console.log("🌐 Provider initialized");
+
+      // Initialize contract with explicit Cairo version
       const contract = new Contract(
         StoreAbi,
         STORE_CONTRACT_ADDRESS,
         provider
       );
 
-      // Call the get_contract_balance function
-      const response = await contract.get_contract_balance();
+      console.log("📄 Contract initialized, calling get_contract_balance...");
       
-      // Convert u256 balance to STRK
-      const balanceValue = response.toString();
-      const balanceInStrk = (Number(balanceValue) / Math.pow(10, 18)).toFixed(6);
+      let response;
+      try {
+        // Try direct method call first
+        response = await contract.get_contract_balance();
+        console.log("📊 Raw contract balance response:", response);
+      } catch (methodError: any) {
+        console.log("⚠️ Method call failed, trying contract.call:", methodError.message);
+        try {
+          // Fallback to contract.call if direct method fails
+          response = await contract.call('get_contract_balance');
+          console.log("📊 Raw contract balance response (via call):", response);
+        } catch (callError) {
+          console.error("❌ Both method calls failed:", callError);
+          throw callError;
+        }
+      }
+      
+      console.log("📊 Response type:", typeof response);
+      console.log("📊 Response constructor:", response?.constructor?.name);
+      
+      // Handle different response formats
+      let balanceValue = BigInt(0);
+      
+      // Handle BigInt response (like 16988099232565525504n)
+      if (typeof response === 'bigint') {
+        console.log("📊 Response is BigInt:", response.toString());
+        balanceValue = response;
+      } else if (Array.isArray(response) && response.length > 0) {
+        console.log("📊 Response is array, first element:", response[0]);
+        balanceValue = BigInt(response[0].toString());
+      } else if (typeof response === 'object' && response !== null) {
+        if ('low' in response && 'high' in response) {
+          console.log("📊 Response has low/high parts:", { low: response.low, high: response.high });
+          balanceValue = BigInt(response.low.toString()) + (BigInt(response.high.toString()) << BigInt(128));
+        } else if (response.toString) {
+          console.log("📊 Converting object to string:", response.toString());
+          balanceValue = BigInt(response.toString());
+        }
+      } else {
+        console.log("📊 Direct conversion:", response);
+        balanceValue = BigInt(response.toString());
+      }
+      
+      console.log("💰 Parsed balance value (wei):", balanceValue.toString());
+      
+      // Convert to STRK (18 decimals) - handle large numbers safely
+      const balanceInWei = balanceValue.toString();
+      const balanceInStrk = balanceInWei.length > 18 
+        ? (Number(balanceInWei.slice(0, -18) + '.' + balanceInWei.slice(-18))).toFixed(6)
+        : (Number(balanceInWei) / Math.pow(10, 18)).toFixed(6);
       
       setContractBalance(balanceInStrk);
-      console.log("Contract balance:", balanceInStrk, "STRK");
+      console.log("✅ Final contract balance:", balanceInStrk, "STRK");
+      
+      // Show success toast
+      toast({
+        title: "✅ Success",
+        description: `Contract balance loaded: ${balanceInStrk} STRK`,
+        variant: "default",
+      });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching contract balance:", error);
+      console.error("Error details:", {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name
+      });
+      
       toast({
         title: "❌ Error",
-        description: "Failed to fetch contract balance",
+        description: `Failed to fetch contract balance: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
+      
+      // Set balance to 0 on error
+      setContractBalance("0");
     } finally {
       setIsLoadingBalance(false);
     }
