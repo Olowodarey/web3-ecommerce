@@ -24,7 +24,8 @@ const Navbar = () => {
     <header className="relative z-40 border-b border-gray-800 bg-gray-900/80 backdrop-blur-xl w-full">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <div className="flex items-center space-x-3">
+         <Link href="/#">
+         <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-lg">W3</span>
             </div>
@@ -35,6 +36,7 @@ const Navbar = () => {
               <div className="text-xs text-blue-400">Next-Gen Commerce</div>
             </div>
           </div>
+         </Link>
 
           <nav className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 items-center space-x-8">
             <Link
@@ -52,7 +54,7 @@ const Navbar = () => {
               <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
-              href="#"
+              href="/About"
               className="text-gray-400 hover:text-white transition-all duration-300 font-medium relative group py-2"
             >
               About
@@ -85,9 +87,9 @@ const Navbar = () => {
               )}
             </div>
 
-            <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+            {/* <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <Cartitems />
-            </Sheet>
+            </Sheet> */}
 
             <WalletConnectDialog isOpen={isOpen} setIsOpen={setIsOpen} />
           </div>

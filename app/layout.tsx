@@ -26,18 +26,20 @@ export default function RootLayout({
       <body className={inter.className}>
         <StarknetProvider>
           <StoreProvider>
-          <div className="min-h-screen bg-black text-white relative overflow-hidden ">
-            {/* Background with Subtle Glow Effects */}
-            <div className="absolute inset-0">
-              <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
-              <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-orange-500/3 rounded-full blur-3xl animate-pulse delay-500" />
+            <div className="min-h-screen bg-black text-white relative overflow-hidden flex flex-col">
+              {/* Background with Subtle Glow Effects */}
+              <div className="absolute inset-0">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+                <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-orange-500/3 rounded-full blur-3xl animate-pulse delay-500" />
+              </div>
+              <Navbar />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <Toaster />
             </div>
-            <Navbar />
-            {children}
-            <Toaster />
-            <Footer />
-          </div>
           </StoreProvider>
         </StarknetProvider>
       </body>

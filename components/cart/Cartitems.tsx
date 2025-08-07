@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { updateQuantity, removeFromCart, clearCart } from "@/lib/features/cart/cartSlice";
 import type { Product, CartItem } from "@/lib/features/cart/cartSlice";
+import CheckoutButton from "@/components/cart/CheckoutButton";
 
 const Cartitems = () => {
   const dispatch = useAppDispatch();
@@ -180,14 +181,16 @@ const Cartitems = () => {
                 <div className="flex justify-between text-xl font-bold text-white bg-gray-800/50 p-4 rounded-xl">
                   <span>Total: {getTotalPrice().toFixed(3)} ETH</span>
                 </div>
-                <Button
-                  onClick={checkout}
+                <CheckoutButton
                   className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-orange-500/25 transition-all duration-300 transform hover:scale-105"
                   size="lg"
-                >
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Checkout Now
-                </Button>
+                  strkPrice={0.5} // Fallback STRK price - should ideally fetch live price
+                  onCheckoutSuccess={() => {
+                    setIsCartOpen(false);
+                    // Optionally refresh the page or update product stock
+                    window.location.reload();
+                  }}
+                />
               </div>
             </>
           )}

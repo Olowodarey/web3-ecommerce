@@ -12,7 +12,13 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Contract, Provider, constants, shortString, byteArray } from "starknet";
+import {
+  Contract,
+  Provider,
+  constants,
+  shortString,
+  byteArray,
+} from "starknet";
 import { StoreAbi } from "@/constants/abi";
 import { STORE_CONTRACT_ADDRESS } from "@/constants";
 import { getIPFSUrl, isValidIPFSHash } from "@/lib/pinata";
@@ -28,8 +34,6 @@ interface Product {
   stock: number;
   featured?: boolean;
 }
-
-
 
 interface ContractProduct {
   id: number;
@@ -131,7 +135,8 @@ const Product = () => {
         console.log("✅ Live STRK price updated:", `$${livePrice}`);
 
         const now = Date.now();
-        if (now - lastToastTime > 3600000) { // 1 hour in ms
+        if (now - lastToastTime > 3600000) {
+          // 1 hour in ms
           toast({
             title: "📈 Live Price Updated",
             description: `STRK price: $${livePrice.toFixed(4)}`,
@@ -180,7 +185,8 @@ const Product = () => {
 
         // Initialize Starknet provider
         const provider = new Provider({
-          nodeUrl: "https://starknet-sepolia.blastapi.io/cb15156d-9e8d-4a8b-aa9a-81d8de0e09a7/rpc/v0_8",
+          nodeUrl:
+            "https://starknet-sepolia.blastapi.io/cb15156d-9e8d-4a8b-aa9a-81d8de0e09a7/rpc/v0_8",
         });
 
         // Initialize contract
@@ -201,14 +207,19 @@ const Product = () => {
           // Decode felt252 values back to strings
           let productName = "Unknown Product";
           let imageUrl = "/placeholder.svg?height=100&width=100";
-          
+
           try {
             // Decode the felt252 product name
-            productName = shortString.decodeShortString(item.productname.toString());
+            productName = shortString.decodeShortString(
+              item.productname.toString()
+            );
           } catch (error) {
-            console.warn(`Failed to decode product name for item ${item.id}:`, error);
+            console.warn(
+              `Failed to decode product name for item ${item.id}:`,
+              error
+            );
           }
-          
+
           try {
             // Debug: Log the raw image data
             console.log(`🔍 Debug item ${item.id} image data:`, {
@@ -216,17 +227,20 @@ const Product = () => {
               value: item.Img,
               toString: item.Img?.toString(),
             });
-            
+
             // ByteArray is automatically converted to string by Starknet library
             // Based on starknet-supermarket repository approach
             let decodedImage = item.Img.toString();
-            
+
             console.log(`✅ Decoded image for item ${item.id}:`, decodedImage);
-            
+
             // Check if it's an IPFS hash and convert to URL
             if (isValidIPFSHash(decodedImage)) {
               imageUrl = getIPFSUrl(decodedImage);
-              console.log(`🌐 IPFS URL generated for item ${item.id}:`, imageUrl);
+              console.log(
+                `🌐 IPFS URL generated for item ${item.id}:`,
+                imageUrl
+              );
             } else if (decodedImage && decodedImage !== "") {
               // Regular URL
               imageUrl = decodedImage;
@@ -235,16 +249,19 @@ const Product = () => {
               console.warn(`⚠️ Empty decoded image for item ${item.id}`);
             }
           } catch (error) {
-            console.warn(`❌ Failed to decode image URL for item ${item.id}:`, error);
+            console.warn(
+              `❌ Failed to decode image URL for item ${item.id}:`,
+              error
+            );
           }
-          
+
           console.log(`Product ${item.id} decoded:`, {
             originalName: item.productname.toString(),
             decodedName: productName,
             originalImage: item.Img.toString(),
-            decodedImage: imageUrl
+            decodedImage: imageUrl,
           });
-          
+
           return {
             id: Number(item.id.toString()),
             name: productName,
@@ -277,12 +294,8 @@ const Product = () => {
     fetchProducts();
   }, []);
 
-
-
-
-
   return (
-    <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       <div className="mb-16 text-center">
         <h2 className="text-5xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-6">
           ✨ Featured Products
@@ -328,9 +341,9 @@ const Product = () => {
                   <CardTitle className="text-xl mb-3 text-white group-hover:text-blue-300 transition-colors duration-300">
                     {product.name}
                   </CardTitle>
-                  <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  {/* <p className="text-gray-400 text-sm mb-6 leading-relaxed">
                     {product.description}
-                  </p>
+                  </p> */}
                   <div className="flex justify-between items-center mb-6">
                     <div className="text-left">
                       <span className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -344,7 +357,7 @@ const Product = () => {
                       variant={product.stock > 0 ? "default" : "destructive"}
                       className={`${
                         product.stock > 0
-                          ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 mb-7"
                           : ""
                       } transition-all duration-300`}
                     >
@@ -355,18 +368,18 @@ const Product = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="p-6 pt-0 flex flex-col space-y-3">
-                  <AddToCartButton
+                  {/* <AddToCartButton
                     product={product}
                     variant="outline"
                     className="w-full h-11 border-gray-600 bg-gray-800/80 text-white hover:bg-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105"
                     disabled={product.stock === 0}
-                  />
-                  <BuyNowButton 
+                  /> */}
+                  <BuyNowButton
                     product={product}
                     strkPrice={strkPrice || undefined}
                     onPurchaseSuccess={() => {
                       // Refresh products after successful purchase
-                      window.location.reload() // Simple refresh for now
+                      window.location.reload(); // Simple refresh for now
                     }}
                   />
                 </CardFooter>
