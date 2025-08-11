@@ -110,7 +110,7 @@ const ContractBalance = () => {
            
             </div>
             {!isLoading && Number(balance) > 0 && (
-              <TrendingUp className="h-3 w-3 text-green-400" />
+              <TrendingUp className="h-3 w-3 text-green-450" />
             )}
           </div>
         </div>
